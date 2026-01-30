@@ -14,11 +14,16 @@ from protocolo import (
     MSG_TYPE_GPS_DATA,
     TOTAL_MESSAGE_SIZE
 )
+import http.server
+import socketserver
+import json
+import os
 
 # ==================== CONFIGURACIÓN DEL SERVIDOR ====================
 
 SERVER_HOST = '0.0.0.0'  # Escuchar en todas las interfaces
 SERVER_PORT = 9999
+HTTP_PORT = 8000
 MAX_CLIENTS = 10
 TIMEOUT = 10  # segundos
 
@@ -33,6 +38,46 @@ class Colors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
+# ==================== CLASE SERVIDOR HTTP ====================
+
+class GPSHTTPHandler(http.server.SimpleHTTPRequestHandler):
+    """
+    Manejador de peticiones HTTP para el mapa y API
+    """
+    def do_GET(self):
+        if self.path == '/api/data':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            
+            # Preparar datos
+            data = {
+                'message_count': server.message_count,
+                'clients': {}
+            }
+            
+            with server.lock:
+                for device_id, info in server.clients.items():
+                    data['clients'][str(device_id)] = {
+                        'device_id': device_id,
+                        'latitude': info.get('latitude', 0),
+                        'longitude': info.get('longitude', 0),
+                        'altitude': info.get('altitude', 0),
+                        'battery': info.get('battery', 0),
+                        'signal': info.get('signal', 0),
+                        'timestamp': info.get('last_seen', 0) * 1000
+                    }
+            
+            self.wfile.write(json.dumps(data).encode())
+        elif self.path == '/' or self.path == '/index.html':
+            self.path = '/mapa.html'
+            return http.server.SimpleHTTPRequestHandler.do_GET(self)
+        else:
+            return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
+    def log_message(self, format, *args):
+        return  # Silenciar logs de HTTP para no ensuciar la consola
 
 # ==================== CLASE SERVIDOR GPS ====================
 
@@ -74,10 +119,15 @@ class GPSServer:
             print(f"{Colors.HEADER}{'=' * 70}{Colors.ENDC}")
             print(f"{Colors.BOLD}{Colors.OKGREEN}🛰️  SERVIDOR GPS-RT v1.0 INICIADO{Colors.ENDC}")
             print(f"{Colors.HEADER}{'=' * 70}{Colors.ENDC}")
-            print(f"{Colors.OKCYAN}📡 Escuchando en {self.host}:{self.port}{Colors.ENDC}")
+            print(f"{Colors.OKCYAN}📡 Escuchando GPS en {self.host}:{self.port}{Colors.ENDC}")
+            print(f"{Colors.OKCYAN}🌍 Servidor Web en http://localhost:{HTTP_PORT}{Colors.ENDC}")
             print(f"{Colors.OKCYAN}⏰ Timeout: {TIMEOUT} segundos{Colors.ENDC}")
             print(f"{Colors.OKCYAN}👥 Máximo de clientes: {MAX_CLIENTS}{Colors.ENDC}")
             print(f"{Colors.HEADER}{'=' * 70}{Colors.ENDC}\n")
+
+            # Hilo para servidor HTTP
+            http_thread = threading.Thread(target=self.start_http_server, daemon=True)
+            http_thread.start()
             
             # Hilo para monitorear clientes inactivos
             monitor_thread = threading.Thread(target=self.monitor_clients, daemon=True)
@@ -168,6 +218,14 @@ class GPSServer:
                     self.clients[device_id]['last_sequence'] = msg.sequence
                     self.clients[device_id]['last_seen'] = time.time()
                     self.clients[device_id]['message_count'] += 1
+                    
+                    # Guardar últimos datos para el mapa
+                    self.clients[device_id]['latitude'] = msg.latitude
+                    self.clients[device_id]['longitude'] = msg.longitude
+                    self.clients[device_id]['altitude'] = msg.altitude
+                    self.clients[device_id]['battery'] = msg.battery
+                    self.clients[device_id]['signal'] = msg.signal
+                    
                     self.message_count += 1
                 
                 # Procesar mensaje según tipo
@@ -266,6 +324,18 @@ class GPSServer:
                 print(f"   Clientes activos: {len(self.clients)}")
                 print(f"   Total mensajes: {self.message_count}\n")
     
+    def start_http_server(self):
+        """
+        Inicia el servidor HTTP en segundo plano
+        """
+        try:
+            handler = GPSHTTPHandler
+            with socketserver.TCPServer(("", HTTP_PORT), handler) as httpd:
+                self.httpd = httpd
+                httpd.serve_forever()
+        except Exception as e:
+            print(f"{Colors.FAIL}❌ Error iniciando servidor HTTP: {e}{Colors.ENDC}")
+
     def stop(self):
         """
         Detiene el servidor
@@ -287,6 +357,11 @@ class GPSServer:
                 self.server_socket.close()
             except:
                 pass
+        
+        # Cerrar servidor HTTP
+        if hasattr(self, 'httpd'):
+            self.httpd.shutdown()
+            self.httpd.server_close()
         
         print(f"{Colors.OKGREEN}✓ Servidor detenido{Colors.ENDC}")
 
