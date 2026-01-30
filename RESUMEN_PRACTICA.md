@@ -427,22 +427,14 @@ Practica3_GPS-RT/
 
 **Grupo:** 46  
 **Materia:** Redes de Computadoras  
-**Docente:** [Nombre del Ingeniero]  
+**Docente:** Msc. Lic. Montoya Burgos Yony Richard
 **Universidad:** Universidad Mayor de San Simón (UMSS)  
 **Facultad:** Ciencias y Tecnología  
 **Carrera:** Ingeniería de Sistemas  
-**Semestre:** [Semestre]  
 **Gestión:** 2026  
 
 ---
 
-## 📅 CRONOLOGÍA
-
-- **Lunes 27/01:** Asignación de la práctica
-- **Martes 28/01:** Diseño del protocolo
-- **Miércoles 29/01:** Implementación y pruebas
-- **Jueves 29/01:** Documentación
-- **Viernes 30/01 09:00:** Entrega (PLAZO LÍMITE)
 
 ---
 
@@ -472,18 +464,6 @@ Practica3_GPS-RT/
 
 ---
 
-## 🎉 PROYECTO COMPLETADO
-
-**Estado:** ✅ LISTO PARA ENTREGA  
-**Calidad:** ⭐⭐⭐⭐⭐ (Excelente)  
-**Fecha de finalización:** Jueves 29 de Enero, 2026  
-
----
-
 **Grupo 46 - Universidad Mayor de San Simón**  
 **Cochabamba, Bolivia**  
 **Enero 2026**
-
----
-
-*Documento generado automáticamente como parte de la Práctica 3*

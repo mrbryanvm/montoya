@@ -93,7 +93,6 @@ python cliente_gps.py
 - **servidor.py** - Servidor central
 - **cliente_gps.py** - Simulador GPS
 - **README.md** - Manual completo
-- **Especificacion_Protocolo_GPS-RT.docx** - Documento formal
 
 ---
 
