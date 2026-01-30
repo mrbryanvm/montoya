@@ -1,10 +1,6 @@
 """
 Cliente GPS Simulador
 Simula un dispositivo GPS que envía su posición en tiempo real
-
-Autor: Grupo 46
-Materia: Redes de Computadoras - UMSS
-Fecha: Enero 2026
 """
 
 import socket
@@ -70,7 +66,7 @@ class GPSClient:
         self.connected = False
         
         # Simulación de movimiento
-        self.speed = 0.0001  # Grados por actualización (aprox 11 metros)
+        self.speed = 0.001  # Grados por actualización (aprox 110metros)
         self.direction = random.uniform(0, 2 * math.pi)  # Dirección en radianes
     
     def connect(self):
@@ -129,10 +125,10 @@ class GPSClient:
         self.altitude = max(2500, min(2600, self.altitude))
         
         # Simular descarga de batería
-        self.battery = max(0, self.battery - random.uniform(0.05, 0.15))
+        self.battery = max(0, self.battery - random.uniform(0.5, 1.5))
         
         # Simular variación de señal
-        self.signal = max(0, min(100, self.signal + random.randint(-5, 5)))
+        self.signal = max(0, min(100, self.signal + random.randint(-15, 15)))
     
     def send_gps_data(self):
         """

@@ -1,10 +1,6 @@
 """
 GPS-RT Protocol v1.0
 Protocolo de mensajería para dispositivos GPS en tiempo real
-
-Autor: Grupo 46
-Materia: Redes de Computadoras - UMSS
-Fecha: Enero 2026
 """
 
 import struct

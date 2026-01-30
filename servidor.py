@@ -27,7 +27,7 @@ HTTP_PORT = 8000
 MAX_CLIENTS = 10
 TIMEOUT = 10  # segundos
 
-# Colores para la consola (ANSI escape codes)
+# Colores para la consola 
 class Colors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -98,7 +98,7 @@ class GPSServer:
         self.port = port
         self.server_socket = None
         self.running = False
-        self.clients = {}  # {device_id: {socket, address, last_sequence, last_seen}}
+        self.clients = {}  
         self.message_count = 0
         self.lock = threading.Lock()
     
